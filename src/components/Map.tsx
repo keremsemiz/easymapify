@@ -31,6 +31,7 @@ const Map: React.FC = () => {
             const { longitude, latitude } = position.coords;
             console.log(`Longitude: ${longitude}, Latitude: ${latitude}`);
             mapRef.current!.setCenter([longitude, latitude]);
+            mapRef.current!.setZoom(13);
           },
           (error) => {
             console.error(error);
@@ -41,8 +42,33 @@ const Map: React.FC = () => {
         );
       }
     }, []);
+
+    const handleZoomIn = () => {
+      if (mapRef.current) {
+        mapRef.current.zoomIn();
+      }
+    };
+
+    const handleZoomOut = () => {
+      if (mapRef.current) {
+        mapRef.current.zoomOut();
+      }
+    };
+
   
-    return <div className="map-container" ref={mapContainerRef} />;
+    return(
+        <>
+            <div className="titleHolder">
+                <h3>Mapify</h3>
+                <i id='compassIcon' className='uil uil-compass'></i>
+            </div>
+            <div className="zoom-controls">
+                <button onClick={handleZoomIn}>+</button>
+                <button onClick={handleZoomOut}>-</button>
+            </div>
+            <div className="map-container" ref={mapContainerRef} />
+        </>
+    );
   };
   
   export default Map;
