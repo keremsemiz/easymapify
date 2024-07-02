@@ -2,15 +2,23 @@
     height: 100vh;
     width: 100vw;
 }
+
 body{
     margin: 0;
 }
+
 #compassIcon{
     font-size: 2rem;
     padding-right: 2rem;
 }
+
+#searchIcon{
+    font-size: 1.5rem;
+    padding-right: 2rem;
+}
+
 .titleHolder{
-    top: 1rem;
+    bottom: 1rem;
     left: 1rem;
     height: fit-content;
     width: 8rem;
@@ -20,10 +28,10 @@ body{
     position: absolute;
     transition: 0.4s ease-in-out all;
 }
+
 .titleHolder:hover{
     transform: translateY(-3px);
 }
-
 
 .titleHolder h3{
     margin-top: auto;
@@ -31,6 +39,47 @@ body{
     padding-left: 1rem;
     padding-right: .2rem;
 }
+
+.searchHolder{
+    top: 1rem;
+    left: 1rem;
+    height: fit-content;
+    width: 14rem;
+    background-color: #242424;
+    border-radius: 1rem;
+    display: flex;
+    position: absolute;
+    transition: 0.4s ease-in-out all;
+    cursor: pointer;
+}
+
+.searchHolder:hover{
+    transform: translateY(-3px);
+}
+
+.searchHolder form {
+    display: flex;
+    width: 100%;
+}
+
+.searchHolder input {
+    flex: 1;
+    padding: 5px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 1rem 0 0 1rem;
+    outline: none;
+}
+
+.searchHolder button {
+    padding: 5px 10px;
+    background-color: #242424;
+    border: 1px solid #ccc;
+    border-left: none;
+    cursor: pointer;
+    border-radius: 0 1rem 1rem 0;
+}
+
 .zoom-controls {
     position: absolute;
     bottom: 10px;
@@ -38,9 +87,12 @@ body{
     display: flex;
     flex-direction: column;
 }
+
 .zoom-controls button {
     margin: 5px;
     padding: 10px;
     background-color: #242424;
     cursor: pointer;
+    transition: 0.4s ease all;
+    border-radius: .4rem;
 }
