@@ -12,6 +12,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+@import 'mapbox-gl/dist/mapbox-gl.css';
 
 a {
   font-weight: 500;
@@ -28,6 +29,8 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: hidden;
 }
 
 h1 {
