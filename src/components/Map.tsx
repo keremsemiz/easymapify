@@ -1,5 +1,8 @@
 import React, { useRef, useEffect, useState } from 'react';
 import mapboxgl, { LngLatLike } from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
+import MapboxDirections from '@mapbox/mapbox-gl-directions/dist/mapbox-gl-directions';
+import '@mapbox/mapbox-gl-directions/dist/mapbox-gl-directions.css';
 import './Map.css';
 
 mapboxgl.accessToken = 'pk.eyJ1Ijoia3N6bSIsImEiOiJjbHk0aGtjbjcwMmpyMmlzY3B5ZTFjeGx6In0.Ba97fHvQRjXp6Se5vKXoSg';
@@ -7,7 +10,8 @@ mapboxgl.accessToken = 'pk.eyJ1Ijoia3N6bSIsImEiOiJjbHk0aGtjbjcwMmpyMmlzY3B5ZTFje
 const Map: React.FC = () => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [startCity, setStartCity] = useState('');
+  const [endCity, setEndCity] = useState('');
 
   useEffect(() => {
     if (mapContainerRef.current) {
@@ -17,6 +21,14 @@ const Map: React.FC = () => {
         center: [-74.5, 40],
         zoom: 9,
       });
+
+      const directions = new MapboxDirections({
+        accessToken: mapboxgl.accessToken,
+        unit: 'metric',
+        profile: 'mapbox/driving',
+      });
+
+      mapRef.current.addControl(directions, 'top-left');
 
       mapRef.current.on('load', () => {
         console.log('Map loaded');
@@ -40,19 +52,21 @@ const Map: React.FC = () => {
         .setLngLat(coordinates as LngLatLike)
         .addTo(mapRef.current!);
 
-      // Adjust marker position when the map is zoomed or panned
-      const updateMarkerPosition = () => {
-        const canvas = mapRef.current!.getCanvas();
-        const markerElement = el;
-        const { offsetWidth, offsetHeight } = markerElement;
+      const updateMarkerSize = () => {
+        const zoomLevel = mapRef.current!.getZoom();
+        const size = Math.max(5, 20 - (13 - zoomLevel) * 1.5);
+        el.style.width = `${size}px`;
+        el.style.height = `${size}px`;
+        el.style.fontSize = `${size / 2.5}px`;
 
+        const canvas = mapRef.current!.getCanvas();
+        const { offsetWidth, offsetHeight } = el;
         const point = mapRef.current!.project(coordinates as LngLatLike);
-        markerElement.style.transform = `translate(${point.x - offsetWidth / 2}px, ${point.y - offsetHeight / 2}px)`;
+        el.style.transform = `translate(${point.x - offsetWidth / 2}px, ${point.y - offsetHeight / 2}px)`;
       };
 
-      mapRef.current!.on('move', updateMarkerPosition);
-      mapRef.current!.on('zoom', updateMarkerPosition);
-      updateMarkerPosition(); // Initial position
+      mapRef.current!.on('zoom', updateMarkerSize);
+      updateMarkerSize(); 
     };
 
     const updateUserLocation = (coordinates: [number, number], description: string) => {
@@ -68,7 +82,7 @@ const Map: React.FC = () => {
         (position) => {
           const { longitude, latitude } = position.coords;
           console.log(`Longitude: ${longitude}, Latitude: ${latitude}`);
-          updateUserLocation([longitude, latitude], 'Your location');
+          updateUserLocation([longitude, latitude], 'Your Location');
         },
         (error) => {
           console.error('Geolocation error:', error);
@@ -96,20 +110,33 @@ const Map: React.FC = () => {
 
   const handleSearch = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (searchQuery.trim() === '') return;
+    if (startCity.trim() === '' || endCity.trim() === '') return;
 
-    const response = await fetch(
-      `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
-        searchQuery
-      )}.json?access_token=${mapboxgl.accessToken}`
-    );
-    const data = await response.json();
-    if (data.features && data.features.length > 0) {
-      const [longitude, latitude] = data.features[0].center;
-      if (mapRef.current) {
-        mapRef.current.setCenter([longitude, latitude] as LngLatLike);
-        mapRef.current.setZoom(12);
+    const geocodeCity = async (city: string) => {
+      const response = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
+          city
+        )}.json?access_token=${mapboxgl.accessToken}`
+      );
+      const data = await response.json();
+      if (data.features && data.features.length > 0) {
+        const [longitude, latitude] = data.features[0].center;
+        return { longitude, latitude };
       }
+      return null;
+    };
+
+    const startCoordinates = await geocodeCity(startCity);
+    const endCoordinates = await geocodeCity(endCity);
+
+    if (startCoordinates && endCoordinates && mapRef.current) {
+      const directions = new MapboxDirections({
+        accessToken: mapboxgl.accessToken,
+        unit: 'metric',
+        profile: 'mapbox/driving',
+      });
+      directions.setOrigin([startCoordinates.longitude, startCoordinates.latitude]);
+      directions.setDestination([endCoordinates.longitude, endCoordinates.latitude]);
     }
   };
 
@@ -119,9 +146,9 @@ const Map: React.FC = () => {
         <form onSubmit={handleSearch}>
           <input
             type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search for a city"
+            value={startCity}
+            onChange={(e) => setStartCity(e.target.value)}
+            placeholder="Start City"
             className="searchInput"
           />
           <button type="submit">
