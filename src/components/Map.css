@@ -96,3 +96,20 @@ body{
     transition: 0.4s ease all;
     border-radius: .4rem;
 }
+
+.marker {
+    background-color: #007cbf;
+    color: white;
+    padding: 5px;
+    border-radius: 50%;
+    text-align: center;
+    font-size: 12px;
+    font-weight: bold;
+    width: 5rem;
+    height: 5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+  }
+  
