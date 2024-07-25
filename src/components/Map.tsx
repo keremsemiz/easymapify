@@ -5,7 +5,7 @@ import MapboxDirections from '@mapbox/mapbox-gl-directions/dist/mapbox-gl-direct
 import '@mapbox/mapbox-gl-directions/dist/mapbox-gl-directions.css';
 import './Map.css';
 
-mapboxgl.accessToken = 'pk.eyJ1Ijoia3N6bSIsImEiOiJjbHk0aGtjbjcwMmpyMmlzY3B5ZTFjeGx6In0.Ba97fHvQRjXp6Se5vKXoSg';
+mapboxgl.accessToken = 'YOUR_MAPBOX_ACCESS_TOKEN';
 
 const Map: React.FC = () => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
@@ -37,46 +37,45 @@ const Map: React.FC = () => {
       return () => {
         if (mapRef.current) {
           mapRef.current.remove();
+          mapRef.current = null;
         }
       };
     }
   }, []);
 
+  const createMarker = (coordinates: [number, number], description: string) => {
+    const el = document.createElement('div');
+    el.className = 'marker';
+    el.innerHTML = description;
+
+    const marker = new mapboxgl.Marker(el)
+      .setLngLat(coordinates as LngLatLike)
+      .addTo(mapRef.current!);
+
+    const updateMarkerSize = () => {
+      const zoomLevel = mapRef.current!.getZoom();
+      const size = Math.max(5, 20 - (13 - zoomLevel) * 1.5);
+      el.style.width = `${size}px`;
+      el.style.height = `${size}px`;
+      el.style.fontSize = `${size / 2.5}px`;
+
+      const point = mapRef.current!.project(coordinates as LngLatLike);
+      el.style.transform = `translate(${point.x - el.offsetWidth / 2}px, ${point.y - el.offsetHeight / 2}px)`;
+    };
+
+    mapRef.current!.on('zoom', updateMarkerSize);
+    updateMarkerSize(); 
+  };
+
+  const updateUserLocation = (coordinates: [number, number], description: string) => {
+    if (mapRef.current) {
+      mapRef.current.setCenter(coordinates as LngLatLike);
+      mapRef.current.setZoom(13);
+      createMarker(coordinates, description);
+    }
+  };
+
   useEffect(() => {
-    const createMarker = (coordinates: [number, number], description: string) => {
-      const el = document.createElement('div');
-      el.className = 'marker';
-      el.innerHTML = description;
-
-      const marker = new mapboxgl.Marker(el)
-        .setLngLat(coordinates as LngLatLike)
-        .addTo(mapRef.current!);
-
-      const updateMarkerSize = () => {
-        const zoomLevel = mapRef.current!.getZoom();
-        const size = Math.max(5, 20 - (13 - zoomLevel) * 1.5);
-        el.style.width = `${size}px`;
-        el.style.height = `${size}px`;
-        el.style.fontSize = `${size / 2.5}px`;
-
-        const canvas = mapRef.current!.getCanvas();
-        const { offsetWidth, offsetHeight } = el;
-        const point = mapRef.current!.project(coordinates as LngLatLike);
-        el.style.transform = `translate(${point.x - offsetWidth / 2}px, ${point.y - offsetHeight / 2}px)`;
-      };
-
-      mapRef.current!.on('zoom', updateMarkerSize);
-      updateMarkerSize(); 
-    };
-
-    const updateUserLocation = (coordinates: [number, number], description: string) => {
-      if (mapRef.current) {
-        mapRef.current.setCenter(coordinates as LngLatLike);
-        mapRef.current.setZoom(13);
-        createMarker(coordinates, description);
-      }
-    };
-
     if (mapRef.current) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -86,12 +85,9 @@ const Map: React.FC = () => {
         },
         (error) => {
           console.error('Geolocation error:', error);
-          // Fallback location: Center of Central Park, NYC
           updateUserLocation([-73.968285, 40.785091], 'Fallback location');
         },
-        {
-          enableHighAccuracy: true,
-        }
+        { enableHighAccuracy: true }
       );
     }
   }, []);
@@ -108,15 +104,10 @@ const Map: React.FC = () => {
     }
   };
 
-  const handleSearch = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (startCity.trim() === '' || endCity.trim() === '') return;
-
-    const geocodeCity = async (city: string) => {
+  const geocodeCity = async (city: string) => {
+    try {
       const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
-          city
-        )}.json?access_token=${mapboxgl.accessToken}`
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(city)}.json?access_token=${mapboxgl.accessToken}`
       );
       const data = await response.json();
       if (data.features && data.features.length > 0) {
@@ -124,7 +115,15 @@ const Map: React.FC = () => {
         return { longitude, latitude };
       }
       return null;
-    };
+    } catch (error) {
+      console.error('Geocoding error:', error);
+      return null;
+    }
+  };
+
+  const handleSearch = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (startCity.trim() === '' || endCity.trim() === '') return;
 
     const startCoordinates = await geocodeCity(startCity);
     const endCoordinates = await geocodeCity(endCity);

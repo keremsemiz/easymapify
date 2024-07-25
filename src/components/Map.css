@@ -1,23 +1,23 @@
-.map-container{
+.map-container {
     height: 100vh;
     width: 100vw;
 }
 
-body{
+body {
     margin: 0;
 }
 
-#compassIcon{
+#compassIcon {
     font-size: 2rem;
     padding-right: 2rem;
 }
 
-#searchIcon{
+#searchIcon {
     font-size: 1.5rem;
     padding-right: 2rem;
 }
 
-.titleHolder{
+.titleHolder {
     bottom: 1rem;
     left: 1rem;
     height: fit-content;
@@ -30,18 +30,17 @@ body{
     z-index: 999;
 }
 
-.titleHolder:hover{
+.titleHolder:hover {
     transform: translateY(-3px);
 }
 
-.titleHolder h3{
-    margin-top: auto;
-    margin-bottom: auto;
+.titleHolder h3 {
+    margin: auto 0;
     padding-left: 1rem;
     padding-right: .2rem;
 }
 
-.searchHolder{
+.searchHolder {
     top: 50rem;
     left: 1rem;
     height: fit-content;
@@ -111,5 +110,96 @@ body{
     justify-content: center;
     align-items: center;
     position: absolute;
-  }
-  
+}
+
+/* Responsive adjustments */
+
+/* Small devices (max-width: 576px) */
+@media (max-width: 576px) {
+    .titleHolder {
+        width: 6rem;
+    }
+
+    .titleHolder h3 {
+        font-size: 1rem;
+    }
+
+    .searchHolder {
+        width: 10rem;
+        top: 40rem;
+    }
+
+    #compassIcon, #searchIcon {
+        font-size: 1.2rem;
+    }
+
+    .marker {
+        font-size: 10px;
+        width: 3rem;
+        height: 3rem;
+    }
+
+    .zoom-controls button {
+        padding: 5px;
+    }
+}
+
+/* Medium devices (577px and up) */
+@media (min-width: 577px) and (max-width: 768px) {
+    .titleHolder {
+        width: 7rem;
+    }
+
+    .titleHolder h3 {
+        font-size: 1.2rem;
+    }
+
+    .searchHolder {
+        width: 12rem;
+        top: 45rem;
+    }
+
+    #compassIcon, #searchIcon {
+        font-size: 1.5rem;
+    }
+
+    .marker {
+        font-size: 11px;
+        width: 3.5rem;
+        height: 3.5rem;
+    }
+
+    .zoom-controls button {
+        padding: 8px;
+    }
+}
+
+/* Large devices (769px and up) */
+@media (min-width: 769px) {
+    .titleHolder {
+        width: 8rem;
+    }
+
+    .titleHolder h3 {
+        font-size: 1.4rem;
+    }
+
+    .searchHolder {
+        width: 14rem;
+        top: 50rem;
+    }
+
+    #compassIcon, #searchIcon {
+        font-size: 2rem;
+    }
+
+    .marker {
+        font-size: 12px;
+        width: 4rem;
+        height: 4rem;
+    }
+
+    .zoom-controls button {
+        padding: 10px;
+    }
+}
