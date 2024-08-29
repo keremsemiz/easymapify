@@ -1,17 +1,14 @@
 import React, { useRef, useEffect, useState } from 'react';
 import mapboxgl, { LngLatLike } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import MapboxDirections from '@mapbox/mapbox-gl-directions/dist/mapbox-gl-directions';
-import '@mapbox/mapbox-gl-directions/dist/mapbox-gl-directions.css';
 import './Map.css';
 
-mapboxgl.accessToken = 'YOUR_MAPBOX_ACCESS_TOKEN';
+mapboxgl.accessToken = 'pk.eyJ1Ijoia3N6bSIsImEiOiJjbHk0aGtjbjcwMmpyMmlzY3B5ZTFjeGx6In0.Ba97fHvQRjXp6Se5vKXoSg';
 
 const Map: React.FC = () => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const [startCity, setStartCity] = useState('');
-  const [endCity, setEndCity] = useState('');
 
   useEffect(() => {
     if (mapContainerRef.current) {
@@ -21,14 +18,6 @@ const Map: React.FC = () => {
         center: [-74.5, 40],
         zoom: 9,
       });
-
-      const directions = new MapboxDirections({
-        accessToken: mapboxgl.accessToken,
-        unit: 'metric',
-        profile: 'mapbox/driving',
-      });
-
-      mapRef.current.addControl(directions, 'top-left');
 
       mapRef.current.on('load', () => {
         console.log('Map loaded');
@@ -123,19 +112,15 @@ const Map: React.FC = () => {
 
   const handleSearch = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (startCity.trim() === '' || endCity.trim() === '') return;
+
+    if (startCity.trim() === '') return;
 
     const startCoordinates = await geocodeCity(startCity);
-    const endCoordinates = await geocodeCity(endCity);
 
-    if (startCoordinates && endCoordinates && mapRef.current) {
-      const directions = new MapboxDirections({
-        accessToken: mapboxgl.accessToken,
-        unit: 'metric',
-        profile: 'mapbox/driving',
-      });
-      directions.setOrigin([startCoordinates.longitude, startCoordinates.latitude]);
-      directions.setDestination([endCoordinates.longitude, endCoordinates.latitude]);
+    if (startCoordinates && mapRef.current) {
+      mapRef.current.setCenter([startCoordinates.longitude, startCoordinates.latitude]);
+      mapRef.current.setZoom(13); // Adjust zoom level if necessary
+      createMarker([startCoordinates.longitude, startCoordinates.latitude], startCity);
     }
   };
 
@@ -147,7 +132,7 @@ const Map: React.FC = () => {
             type="text"
             value={startCity}
             onChange={(e) => setStartCity(e.target.value)}
-            placeholder="Start City"
+            placeholder="Search City"
             className="searchInput"
           />
           <button type="submit">
