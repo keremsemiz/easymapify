@@ -3,6 +3,10 @@ import mapboxgl, { LngLatLike } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import './Map.css';
 
+if (!process.env.REACT_APP_MAPBOX_ACCESS_TOKEN) {
+  throw new Error('Missing Mapbox access token');
+}
+
 mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN || '';
 
 const Map: React.FC = () => {
