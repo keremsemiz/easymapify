@@ -3,7 +3,7 @@ import mapboxgl, { LngLatLike } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import './Map.css';
 
-mapboxgl.accessToken = 'pk.eyJ1Ijoia3N6bSIsImEiOiJjbHk0aGtjbjcwMmpyMmlzY3B5ZTFjeGx6In0.Ba97fHvQRjXp6Se5vKXoSg';
+mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN || '';
 
 const Map: React.FC = () => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
