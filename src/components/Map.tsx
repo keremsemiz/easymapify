@@ -36,25 +36,26 @@ const Map: React.FC = () => {
     const el = document.createElement('div');
     el.className = 'marker';
     el.innerHTML = description;
-
-    const marker = new mapboxgl.Marker(el)
+  
+    new mapboxgl.Marker(el)
       .setLngLat(coordinates as LngLatLike)
       .addTo(mapRef.current!);
-
+  
     const updateMarkerSize = () => {
       const zoomLevel = mapRef.current!.getZoom();
       const size = Math.max(5, 20 - (13 - zoomLevel) * 1.5);
       el.style.width = `${size}px`;
       el.style.height = `${size}px`;
       el.style.fontSize = `${size / 2.5}px`;
-
+  
       const point = mapRef.current!.project(coordinates as LngLatLike);
       el.style.transform = `translate(${point.x - el.offsetWidth / 2}px, ${point.y - el.offsetHeight / 2}px)`;
     };
-
+  
     mapRef.current!.on('zoom', updateMarkerSize);
-    updateMarkerSize(); 
+    updateMarkerSize();
   };
+  
 
   const updateUserLocation = (coordinates: [number, number], description: string) => {
     if (mapRef.current) {
